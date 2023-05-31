@@ -2,6 +2,7 @@ version: '3'
 
 services:
   web:
+    container_name: react_frontend
     build:
       context: .
       dockerfile: Dockerfile.Frontend
@@ -9,10 +10,12 @@ services:
 
   selenium:
     image: selenium/standalone-chrome
+    container_name: selenium_driver
     ports:
       - 4444:4444
 
   runner:
+    container_name: slide_runner
     build:
       context: .
       dockerfile: Dockerfile.Runner
