@@ -35,12 +35,17 @@ services:
 
   runner:
     container_name: slide_runner
+    volumes:
+      - ./scripts:/app/scripts
+      - ./sides:/app/sides
     build:
       context: .
       dockerfile: Dockerfile.Runner
     depends_on:
       - web
       - selenium
+    command: "sh scripts/run_test.sh"
+
 ```
 
 - Frontend built in react.
@@ -62,6 +67,7 @@ wait_for_it() {
     done
 }
 
+# container name and corresponding ports that should be waited for.
 wait_for_it "selenium_driver" "4444"
 wait_for_it "react_frontend" "3000"
 
@@ -82,3 +88,82 @@ done
 - And wait untill selenium service starts.
 - Run the test
 
+
+## Usage
+
+Since this is a POC repo, for your project, the template would looke like below:
+
+**docker-compose**
+
+```yml
+version: '3'
+
+services:
+  service1:
+    container_name: <service1>
+    build:
+      context: .
+      dockerfile: Dockerfile.<service1>
+    command: "<command>"
+
+  service2:
+    container_name: <service2>
+    build:
+      context: .
+      dockerfile: Dockerfile.<service2>
+    command: "<command>"
+
+  selenium:
+    image: selenium/standalone-chrome
+    container_name: selenium_driver
+    ports:
+      - 4444:4444
+
+  runner:
+    container_name: slide_runner
+    volumes:
+      - ./scripts:/app/scripts
+      - ./sides:/app/sides
+    build:
+      context: .
+      dockerfile: Dockerfile.Runner
+    depends_on:
+      - web
+      - selenium
+    command: "sh scripts/run_test.sh"
+```
+
+**run_test.sh**
+
+```sh
+#!/bin/bash
+
+wait_for_it() {
+    local host="$1"
+    local port="$2"
+
+    while ! nc -z "$host" "$port"; do
+        echo "$host:$port is not runing, waiting for it."
+        sleep 0.1
+    done
+}
+
+# container name and corresponding ports that should be waited for.
+wait_for_it "selenium_driver" "4444"
+wait_for_it "<service1_container_name>" "<service1_container_port>"
+wait_for_it "<service2_container_name>" "<service2_container_port>"
+# .....
+wait_for_it "<servicen_container_name>" "<servicen_container_port>"
+
+echo "both services started"
+
+slides_directory="sides"
+
+for file in "$slides_directory"/*
+do
+    if [ -f "$file" ]; then
+        echo "Runing slides from $file"
+        selenium-side-runner "$file" --server http://selenium_driver:4444/wd/hub
+    fi
+done
+```

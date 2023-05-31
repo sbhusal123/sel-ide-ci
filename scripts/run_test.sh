@@ -10,6 +10,7 @@ wait_for_it() {
     done
 }
 
+# containers names and port that should be waited for
 wait_for_it "selenium_driver" "4444"
 wait_for_it "react_frontend" "3000"
 

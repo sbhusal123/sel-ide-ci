@@ -16,9 +16,13 @@ services:
 
   runner:
     container_name: slide_runner
+    volumes:
+      - ./scripts:/app/scripts
+      - ./sides:/app/sides
     build:
       context: .
       dockerfile: Dockerfile.Runner
     depends_on:
       - web
       - selenium
+    command: "sh scripts/run_test.sh"

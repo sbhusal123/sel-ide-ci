@@ -8,11 +8,3 @@ RUN npm install -g selenium-side-runner
 
 # Set the working directory in the container
 WORKDIR /app
-
-COPY scripts /app/scripts
-
-COPY sides /app/sides/
-
-
-
-CMD ["sh", "scripts/run_test.sh"]
