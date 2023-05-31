@@ -88,6 +88,24 @@ done
 - And wait untill selenium service starts.
 - Run the test
 
+**travis-ci runner**
+
+```yml
+language: python
+python:
+  - "3.6"
+
+services:
+  - docker
+
+before_script: pip install docker-compose
+
+script: 
+  - docker-compose run runner
+```
+
+Basically the travis CI runs the container runner which should depend on other sub containers to run before.
+
 
 ## Usage
 
