@@ -1,0 +1,20 @@
+# Use an official Node.js runtime as the base image
+FROM node:14-alpine
+
+# Set the working directory in the container
+WORKDIR /app
+
+RUN apk add curl
+
+# Install selenium-side-runner globally
+RUN npm install -g selenium-side-runner
+
+COPY docker_script.sh docker_script.sh
+
+RUN chmod +x docker_script.sh
+
+
+# Copy the rest of the application code to the container
+COPY ./sides/Test.side .
+
+ENTRYPOINT ["./docker_script.sh"]

@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.React
+    command: "yarn start"
+
+  selenium:
+    image: selenium/standalone-chrome
+    ports:
+      - 4444:4444
+
+  runner:
+    build:
+      context: .
+      dockerfile: Dockerfile.Node
+    depends_on:
+      - web
+      - selenium
