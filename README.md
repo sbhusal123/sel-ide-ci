@@ -1,46 +1,84 @@
-# Getting Started with Create React App
+# Runing Selenium Slides With CI
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This is a POC concept for runing the no code web browser testing automation tool i.e. selenium side within ci.
 
-## Available Scripts
+## What is Selenium IDE how does it helps ?
+Selenium IDE is a record and playback tools (browser extension), that is used to record the interaction we do with the webpages on browser. After recording the every interaction with the web page, it generates a file with `.side` extension which can be ran using the node library `selenium-side-runner`
 
-In the project directory, you can run:
+- [Selenium IDE ](https://www.selenium.dev/selenium-ide/)
+- [Side Runner NPM](https://www.npmjs.com/package/selenium-side-runner)
 
-### `yarn start`
+**Tools:**
+- Selenium Web Driver
+- Node Runtime
+- Selenium IDE side
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+**docker_compose**
 
-### `yarn test`
+```yml
+version: '3'
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+services:
+  web:
+    container_name: react_frontend
+    build:
+      context: .
+      dockerfile: Dockerfile.Frontend
+    command: "yarn start"
 
-### `yarn build`
+  selenium:
+    image: selenium/standalone-chrome
+    container_name: selenium_driver
+    ports:
+      - 4444:4444
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+  runner:
+    container_name: slide_runner
+    build:
+      context: .
+      dockerfile: Dockerfile.Runner
+    depends_on:
+      - web
+      - selenium
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+- Frontend built in react.
+- Sides placed inside `/sides` directory
+- To run those sides on a browser environment, we need access to the browser which is handled by `selenium` service in docker.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+**test script**
 
-### `yarn eject`
+```sh
+#!/bin/bash
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+wait_for_it() {
+    local host="$1"
+    local port="$2"
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+    while ! nc -z "$host" "$port"; do
+        echo "$host:$port is not runing, waiting for it."
+        sleep 0.1
+    done
+}
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+wait_for_it "selenium_driver" "4444"
+wait_for_it "react_frontend" "3000"
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+echo "both services started"
 
-## Learn More
+slides_directory="sides"
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+for file in "$slides_directory"/*
+do
+    if [ -f "$file" ]; then
+        echo "Runing slides from $file"
+        selenium-side-runner "$file" --server http://selenium_driver:4444/wd/hub
+    fi
+done
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+- So the idea is to wait untill all our subsystems (backend, frontend and other) containers to be started.
+- And wait untill selenium service starts.
+- Run the test
+
