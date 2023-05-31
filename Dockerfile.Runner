@@ -11,7 +11,7 @@ WORKDIR /app
 
 COPY scripts /app/scripts
 
-COPY sides/Test.side /app/Test.side
+COPY sides /app/sides/
 
 
 

@@ -1,19 +1,27 @@
 #!/bin/bash
 
-# wait untill selenium driver starts
-while ! nc -z "selenium_driver" "4444"; do
-    echo "Selenium driver is not started yet, waiting..."
-    sleep 0.1
-done
+wait_for_it() {
+    local host="$1"
+    local port="$2"
 
-# wait untill frontend starts
-while ! nc -z "react_frontend" "3000"; do
-    echo "React frontend is not started yet, waiting..."
-    sleep 0.1
-done
+    while ! nc -z "$host" "$port"; do
+        echo "$host:$port is not runing, waiting for it."
+        sleep 0.1
+    done
+}
+
+wait_for_it "selenium_driver" "4444"
+wait_for_it "react_frontend" "3000"
 
 echo "both services started"
 
-selenium-side-runner Test.side --server http://selenium_driver:4444/wd/hub
+slides_directory="sides"
 
-exec "@"
+for file in "$slides_directory"/*
+do
+    if [ -f "$file" ]; then
+        echo "Runing slides from $file"
+        selenium-side-runner "$file" --server http://selenium_driver:4444/wd/hub
+    fi
+done
+
