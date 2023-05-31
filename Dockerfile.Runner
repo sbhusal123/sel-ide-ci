@@ -1,32 +1,17 @@
-# Base image
-FROM ubuntu:latest
+# Use an official Node.js runtime as the base image
+FROM node:14-alpine
 
-# Update and install dependencies
-RUN apt-get update -y && \
-    apt-get install -y wget curl unzip libgconf-2-4 libxss1 xvfb
+RUN apk add curl
 
-# Install Node.js
-RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
-RUN apt-get install -y nodejs
-
-# Install Selenium dependencies
-RUN apt-get install -y openjdk-11-jdk
-
-
-# Set up the working directory
-WORKDIR /app
-
-# Download Selenium WebDriver
-RUN wget -O selenium-server-standalone.jar https://selenium-release.storage.googleapis.com/3.141/selenium-server-standalone-3.141.59.jar
-
-# Copy the application files
-COPY ./sides/Test.side ./Test.side
-COPY docker_script.sh /app/
-RUN chmod +x docker_script.sh
-
-# Install Node.js dependencies
-RUN npm install
-
+# Install selenium-side-runner globally
 RUN npm install -g selenium-side-runner
 
-CMD ["./docker_script.sh"]
+# Set the working directory in the container
+WORKDIR /app
+
+COPY scripts/run_test.sh /app/run_test.sh
+COPY sides/Test.side /app/Test.side
+
+
+
+CMD ["sh", "run_test.sh"]

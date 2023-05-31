@@ -4,7 +4,7 @@ services:
   web:
     build:
       context: .
-      dockerfile: Dockerfile.React
+      dockerfile: Dockerfile.Frontend
     command: "yarn start"
 
   selenium:
@@ -15,7 +15,7 @@ services:
   runner:
     build:
       context: .
-      dockerfile: Dockerfile.Node
+      dockerfile: Dockerfile.Runner
     depends_on:
       - web
       - selenium
