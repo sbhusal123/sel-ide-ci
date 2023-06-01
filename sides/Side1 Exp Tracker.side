@@ -2,7 +2,7 @@
   "id": "41e2c619-235a-4bd7-a163-43f763551d01",
   "version": "2.0",
   "name": "Side1: Exp Tracker",
-  "url": "http://web:3001/",
+  "url": "http://web:3000/",
   "tests": [{
     "id": "e857e554-427c-459f-9b55-3d6b8b39b8e0",
     "name": "Delete All Transaction Success",
@@ -719,6 +719,6 @@
     "timeout": 300,
     "tests": ["e857e554-427c-459f-9b55-3d6b8b39b8e0", "5b524f06-5f5f-49a2-b069-b4a7d76dc70f", "ead13186-779e-47e9-8778-718aba8a48a1", "e3c6df06-7320-4c21-a57b-9c4fd479b6ae"]
   }],
-  "urls": ["http://web:3001/"],
+  "urls": ["http://web:3000/"],
   "plugins": []
 }
